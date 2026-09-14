@@ -1,0 +1,32 @@
+body { 
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+    margin: 0;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%);
+    background-attachment: fixed;
+}
+.container { 
+    max-width: 800px; 
+    margin: 40px auto; 
+    padding: 30px; 
+    background: rgba(255, 255, 255, 0.4); 
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 15px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+.form-group, h3 {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+}
+header { background: rgba(0, 86, 179, 0.8); color: white; padding: 20px; text-align: center; }
+a { color: #0056b3; text-decoration: none; }
+a:hover { text-decoration: underline; }
+.btn { display: inline-block; padding: 10px 20px; background-color: #007bff; color: white; border-radius: 5px; text-decoration: none; margin: 10px 0; border: none; cursor: pointer; }
+.btn:hover { background-color: #0056b3; }
+input, textarea, select { padding: 10px; margin: 5px 0; width: 100%; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; background: white; }
+button { padding: 10px 20px; background-color: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer; }
+button:hover { background-color: #218838; }
+.edu-entry { background: rgba(255, 255, 255, 0.3); border: 1px solid rgba(255, 255, 255, 0.5); padding: 15px; margin-bottom: 15px; border-radius: 10px; }

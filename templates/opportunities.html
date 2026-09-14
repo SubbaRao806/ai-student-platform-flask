@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Internship & Job Opportunities</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; padding: 20px; margin: 0; }
+        .container { max-width: 1100px; margin: auto; }
+        h1 { text-align: center; color: #0056b3; }
+        .nav { text-align: center; margin-bottom: 20px; }
+        .nav a { margin: 0 15px; text-decoration: none; color: #007bff; font-weight: bold; }
+        .nav a:hover { text-decoration: underline; }
+        .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+        .card { border: 2px solid #ddd; padding: 20px; border-radius: 10px; background: white; cursor: pointer; transition: all 0.3s; }
+        .card:hover { border-color: #007bff; box-shadow: 0 4px 16px rgba(0,0,0,0.15); transform: translateY(-3px); }
+        .card h3 { margin-top: 0; color: #0056b3; }
+        .meta { margin: 10px 0; color: #555; font-size: 14px; line-height: 1.6; }
+        .meta strong { color: #333; }
+        .match-badge { display: inline-block; padding: 4px 12px; border-radius: 12px; font-size: 13px; font-weight: bold; }
+        .match-high { background: #d4edda; color: #155724; }
+        .match-med { background: #fff3cd; color: #856404; }
+        .match-low { background: #f8d7da; color: #721c24; }
+        .apply-btn { display: inline-block; background: #28a745; color: white; padding: 8px 16px; border-radius: 4px; text-decoration: none; font-size: 13px; margin-top: 10px; }
+        .apply-btn:hover { background: #218838; }
+        .apply-btn.apply-disabled { background: #6c757d; cursor: not-allowed; }
+        .apply-unavailable { color: #721c24; font-size: 12px; font-weight: bold; }
+        .detail-link { display: inline-block; background: #007bff; color: white; padding: 8px 16px; border-radius: 4px; text-decoration: none; font-size: 13px; margin-top: 10px; }
+        .detail-link:hover { background: #0056b3; }
+        .no-opps { text-align: center; color: #666; padding: 40px; font-size: 18px; }
+        .btn-back { display: inline-block; background: #6c757d; color: white; padding: 10px 20px; border-radius: 4px; text-decoration: none; margin-bottom: 20px; }
+        .btn-back:hover { background: #5a6268; }
+        .btn-fetch { display: inline-block; background: #fd7e14; color: white; padding: 10px 20px; border-radius: 4px; text-decoration: none; margin-bottom: 20px; font-weight: bold; }
+        .btn-fetch:hover { background: #e55800; }
+        .badge { display: inline-block; padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; margin-right: 5px; }
+        .badge-job { background: #007bff; color: white; }
+        .badge-internship { background: #28a745; color: white; }
+        .badge-contract { background: #ffc107; color: #333; }
+        .salary { color: #28a745; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Internship & Job Recommendations</h1>
+        <div class="nav">
+            <a href="/dashboard">← Back to Dashboard</a>
+            <a href="/find-opps-api" onclick="fetchOppsApp(event)">🔄 Fetch Latest</a>
+            <span id="fetch-status" style="margin-left:10px;color:#555;"></span>
+        </div>
+        
+        <script>
+            async function fetchOppsApp(event) {
+                event.preventDefault();
+                const statusEl = document.getElementById('fetch-status');
+                statusEl.textContent = 'Fetching...';
+                try {
+                    const response = await fetch('/find-opps-api', { method: 'POST', headers: {'Content-Type': 'application/x-www-form-urlencoded'} });
+                    const data = await response.json();
+                    if (data.status === 'success') {
+                        statusEl.textContent = `Received ${(data.opportunities || []).length} opportunities. Reloading...`;
+                        window.location.reload();
+                    } else {
+                        statusEl.textContent = 'Fetch failed. Please try again.';
+                    }
+                } catch (err) {
+                    statusEl.textContent = 'Fetch failed (are you logged in?). Please try again.';
+                }
+            }
+        </script>
+        
+        {% if opportunities %}
+            <div class="cards">
+                {% for opp in opportunities %}
+                    <div class="card" onclick="window.location.href='/opportunity/{{ opp.id }}'">
+                        <h3>{{ opp.title }}</h3>
+                        <span class="badge badge-{{ opp.opp_type }}">{{ opp.opp_type | title }}</span>
+                        <div class="meta">
+                            <strong>Company:</strong> {{ opp.company }}<br>
+                            <strong>Location:</strong> {{ opp.location }}<br>
+                            <strong>Salary:</strong> <span class="salary">{{ opp.salary_stipend }}</span><br>
+                            <strong>Description:</strong> {{ opp.description }}...
+                        </div>
+                        <span class="match-badge {% if opp.match_percent >= 70 %}match-high{% elif opp.match_percent >= 40 %}match-med{% else %}match-low{% endif %}">
+                            {{ opp.match_percent }}% Match
+                        </span>
+                        <span class="match-badge {% if opp.ats_score >= 70 %}match-high{% elif opp.ats_score >= 40 %}match-med{% else %}match-low{% endif %}" style="background: #17a2b8;">
+                            🤖 ATS: {{ opp.ats_score }}%
+                        </span>
+                        <br>
+                        {% if opp.apply_url %}
+                            <a href="{{ opp.apply_url }}" target="_blank" rel="noopener noreferrer" class="apply-btn" onclick="event.stopPropagation()">Apply Now →</a>
+                        {% else %}
+                            <span class="apply-btn apply-disabled">Apply Now</span>
+                            <p class="apply-unavailable">Application link unavailable.</p>
+                        {% endif %}
+                        <br>
+                        <span class="detail-link" onclick="event.stopPropagation()">View Details →</span>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="no-opps">
+                <p>No opportunities available at the moment.</p>
+                <p>Click "Fetch Latest" to load opportunities from Adzuna API.</p>
+            </div>
+        {% endif %}
+    </div>
+</body>
+</html>

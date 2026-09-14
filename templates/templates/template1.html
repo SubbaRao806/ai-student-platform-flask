@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Resume - {{ profile.full_name }}</title>
+    <style>
+        body { font-family: 'Arial', sans-serif; line-height: 1.6; padding: 20px; color: #333; }
+        .container { max-width: 800px; margin: auto; border: 2px solid #333; padding: 30px; }
+        .header { text-align: center; border-bottom: 2px solid #333; padding-bottom: 10px; margin-bottom: 20px; }
+        .section { margin-bottom: 15px; padding: 10px; border-bottom: 1px solid #eee; }
+        .flex { display: flex; justify-content: space-between; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>{{ profile.full_name }}</h1>
+            <p>{{ profile.email }} | {{ profile.phone_number }} | {{ profile.dob }}</p>
+            <p>{{ profile.address }}</p>
+            <p><a href="{{ profile.linkedin_url }}">LinkedIn</a> | <a href="{{ profile.github_url }}">GitHub</a></p>
+        </div>
+        <div class="section">
+            <h3>Summary</h3>
+            <p>{{ profile.summary }}</p>
+        </div>
+        <div class="section">
+            <h3>Education</h3>
+            {% for edu in education %}
+                <p><strong>{{ edu.degree_type }}</strong>, {{ edu.institution }} ({{ edu.start_year }}-{{ edu.end_year }}) - {{ edu.location }} | {{ edu.score_type }}: {{ edu.score_value }}</p>
+            {% endfor %}
+        </div>
+        <div class="section">
+            <h3>Work Experience</h3>
+            {% for exp in experience %}
+                <p><strong>{{ exp.job_title }}</strong> at {{ exp.company_name }} ({{ exp.start_date }} - {{ exp.end_date }}) - {{ exp.location }}</p>
+                <p>{{ exp.description }}</p>
+            {% endfor %}
+        </div>
+        <div class="section">
+            <h3>Projects</h3>
+            {% for p in projects %}
+                <p><strong>{{ p.title }}</strong> [{{ p.technologies }}]: {{ p.description }} <a href="{{ p.link }}">(Link)</a></p>
+            {% endfor %}
+        </div>
+        <div class="section">
+            <h3>Skills</h3>
+            <p><strong>Technical:</strong> {% for s in skills if s.skill_type == 'Technical' %}{{ s.skill_name }}{% if not loop.last %}, {% endif %}{% endfor %}</p>
+            <p><strong>Soft:</strong> {% for s in skills if s.skill_type == 'Soft' %}{{ s.skill_name }}{% if not loop.last %}, {% endif %}{% endfor %}</p>
+            <p><strong>Learning:</strong> {% for s in skills if s.skill_type == 'Learning' %}{{ s.skill_name }}{% if not loop.last %}, {% endif %}{% endfor %}</p>
+        </div>
+        <div class="section">
+            <h3>Certifications</h3>
+            <ul>{% for c in certifications %}<li>{{ c.title }}</li>{% endfor %}</ul>
+        </div>
+        <div class="section">
+            <h3>Achievements</h3>
+            <ul>{% for a in achievements %}<li>{{ a.title }}</li>{% endfor %}</ul>
+        </div>
+        <div class="section">
+            <h3>Languages</h3>
+            <p>{% for l in languages %}{{ l.language_name }}{% if not loop.last %}, {% endif %}{% endfor %}</p>
+        </div>
+        <button onclick="window.print()">Print Resume</button>
+        <form action="/save-template" method="POST" style="display:inline;">
+            <input type="hidden" name="template" value="template1">
+            <button type="submit" class="btn">Generate</button>
+        </form>
+    </div>
+</body>
+</html>

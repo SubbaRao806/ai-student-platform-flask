@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Resume - {{ profile.full_name }}</title>
+    <style>
+        body { margin: 0; display: flex; font-family: sans-serif; }
+        .sidebar { width: 30%; background: #2c3e50; color: white; padding: 40px; min-height: 100vh; }
+        .main { width: 70%; padding: 40px; }
+        .section { margin-bottom: 20px; }
+        .sidebar h2 { color: white; border-bottom: 1px solid #555; padding-bottom: 5px; }
+        .main h2 { border-bottom: 1px solid #ccc; padding-bottom: 5px; }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <h1>{{ profile.full_name }}</h1>
+        <p>{{ profile.email }}</p>
+        <p>{{ profile.phone_number }}</p>
+        <p>{{ profile.dob }}</p>
+        <p>{{ profile.address }}</p>
+        <p><a href="{{ profile.linkedin_url }}">LinkedIn</a> | <a href="{{ profile.github_url }}">GitHub</a></p>
+        <h2>Skills</h2>
+        <p><strong>Tech:</strong> {% for s in skills if s.skill_type == 'Technical' %}{{ s.skill_name }}{% if not loop.last %}, {% endif %}{% endfor %}</p>
+        <p><strong>Soft:</strong> {% for s in skills if s.skill_type == 'Soft' %}{{ s.skill_name }}{% if not loop.last %}, {% endif %}{% endfor %}</p>
+        <p><strong>Learning:</strong> {% for s in skills if s.skill_type == 'Learning' %}{{ s.skill_name }}{% if not loop.last %}, {% endif %}{% endfor %}</p>
+        <h2>Certifications</h2>
+        <ul>{% for c in certifications %}<li>{{ c.title }}</li>{% endfor %}</ul>
+        <h2>Achievements</h2>
+        <ul>{% for a in achievements %}<li>{{ a.title }}</li>{% endfor %}</ul>
+        <h2>Languages</h2>
+        <p>{% for l in languages %}{{ l.language_name }}{% if not loop.last %}, {% endif %}{% endfor %}</p>
+        <h2>Education</h2>
+        {% for edu in education %}
+            <p>{{ edu.degree_type }} - {{ edu.institution }}</p>
+        {% endfor %}
+    </div>
+    <div class="main">
+        <div class="section">
+            <h2>Summary</h2>
+            <p>{{ profile.summary }}</p>
+        </div>
+        <div class="section">
+            <h2>Work Experience</h2>
+            {% for exp in experience %}
+                <h3>{{ exp.company_name }}</h3>
+                <p><em>{{ exp.job_title }}</em> ({{ exp.start_date }} - {{ exp.end_date }})</p>
+                <p>{{ exp.description }}</p>
+            {% endfor %}
+        </div>
+        <div class="section">
+            <h2>Projects</h2>
+            {% for p in projects %}
+                <h3>{{ p.title }}</h3>
+                <p>{{ p.technologies }}: {{ p.description }} <a href="{{ p.link }}">(Link)</a></p>
+            {% endfor %}
+        </div>
+    </div>
+    <button onclick="window.print()">Print Resume</button>
+    <form action="/save-template" method="POST" style="display:inline;">
+        <input type="hidden" name="template" value="template2">
+        <button type="submit" class="btn">Generate</button>
+    </form>
+</body>
+</html>

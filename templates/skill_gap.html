@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Skill Gap Analysis</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h2>Skill Gap Analysis{% if opp %} — {{ opp.title }}{% endif %}</h2>
+        <h3>Matched Skills</h3>
+        {% if matched_skills %}
+            <ul>
+                {% for skill in matched_skills %}
+                    <li>{{ skill }}</li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>No required skills matched yet.</p>
+        {% endif %}
+        <h3>Missing Skills</h3>
+        {% if missing_skills %}
+            <p>To qualify for this opportunity, you should focus on developing these skills:</p>
+            <ul>
+                {% for skill in missing_skills %}
+                    <li>{{ skill }}</li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>Great! You have all the required skills for this opportunity.</p>
+        {% endif %}
+        <a href="/find-opportunities">Back to Opportunities</a>
+    </div>
+</body>
+</html>

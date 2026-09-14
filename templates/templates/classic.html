@@ -1,0 +1,13 @@
+<div style="color: {{ color }};">
+    <h1>{{ profile.full_name }}</h1>
+    <p>{{ profile.summary }}</p>
+    
+    {% if model == 'detailed' %}
+        <h3>Education</h3>
+        {% for edu in education %}
+            <p>{{ edu.degree_type }} - {{ edu.institution }}</p>
+        {% endfor %}
+    {% endif %}
+    
+    <button onclick="window.print()">Print</button>
+</div>

@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ opp.title }} | Opportunity Details</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; padding: 20px; margin: 0; background: #f5f5f5; }
+        .container { max-width: 950px; margin: auto; }
+        h1 { color: #0056b3; }
+        .section { border: 1px solid #ddd; padding: 20px; border-radius: 8px; margin-bottom: 20px; background: white; }
+        .section h2 { margin-top: 0; color: #007bff; border-bottom: 2px solid #007bff; padding-bottom: 5px; }
+        .skill-tag { display: inline-block; background: #e8f4fd; color: #0056b3; padding: 5px 12px; border-radius: 15px; margin: 3px; font-size: 13px; }
+        .skill-missing { background: #f8d7da; color: #721c24; }
+        .skill-matched { background: #d4edda; color: #155724; }
+        .apply-btn { display: inline-block; background: #28a745; color: white; padding: 12px 30px; border-radius: 5px; text-decoration: none; font-size: 16px; font-weight: bold; margin-top: 15px; }
+        .apply-btn:hover { background: #218838; }
+        .apply-btn.apply-disabled { background: #6c757d; cursor: not-allowed; }
+        .apply-unavailable { color: #721c24; font-weight: bold; }
+        .btn-back { display: inline-block; background: #6c757d; color: white; padding: 10px 20px; border-radius: 4px; text-decoration: none; margin-bottom: 20px; }
+        .btn-back:hover { background: #5a6268; }
+        .meta { color: #555; line-height: 1.8; }
+        .meta strong { color: #333; }
+        .score-box { display: inline-block; background: #007bff; color: white; padding: 8px 16px; border-radius: 8px; margin: 5px; font-weight: bold; }
+        .score-box.ats { background: #17a2b8; }
+        .score-box.match { background: #28a745; }
+        .improvement-item { background: #fff8e1; border-left: 4px solid #ffc107; padding: 10px 15px; margin: 8px 0; border-radius: 4px; }
+        .improvement-item .skill-name { font-weight: bold; color: #333; }
+        .improvement-item .action-name { color: #007bff; }
+        .improvement-item .resource-link { color: #28a745; font-size: 12px; }
+        .improvement-item .time-est { color: #666; font-size: 12px; }
+        h3 { color: #0056b3; }
+        .badge { display: inline-block; padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; margin-right: 5px; }
+        .badge-job { background: #007bff; color: white; }
+        .badge-internship { background: #28a745; color: white; }
+        .salary { color: #28a745; font-weight: bold; }
+        .role-box { background: #f8f9fa; padding: 15px; border-radius: 8px; border-left: 4px solid #007bff; }
+        .not-specified { color: #888; font-style: italic; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/find-opportunities" class="btn-back">← Back to Opportunities</a>
+
+        <!-- 1. Opportunity title -->
+        <h1>{{ opp.title }}</h1>
+        <div class="meta">
+            <!-- 2. Company -->
+            <p><strong>Company:</strong> {% if opp.company %}{{ opp.company }}{% else %}<span class="not-specified">Not specified by source</span>{% endif %}</p>
+            <!-- 3. Location -->
+            <p><strong>Location:</strong> {% if opp.location %}{{ opp.location }}{% else %}<span class="not-specified">Not specified by source</span>{% endif %}</p>
+            <p><strong>Type:</strong> <span class="badge badge-{{ opp.opp_type }}">{{ opp.opp_type | title }}</span></p>
+            <p><strong>Source:</strong> {{ opp.source }}</p>
+        </div>
+
+        <!-- 4. Requirements (source description only) -->
+        <div class="section">
+            <h2>Requirements</h2>
+            {% if opp.description %}
+                <p>{{ opp.description }}</p>
+            {% else %}
+                <p class="not-specified">No requirements text provided by source.</p>
+            {% endif %}
+            {% if opp.eligibility %}
+                <p><strong>Eligibility:</strong> {{ opp.eligibility }}</p>
+            {% endif %}
+        </div>
+
+        <!-- 5. Important Dates (source data only, never invented) -->
+        <div class="section">
+            <h2>Important Dates</h2>
+            <p><strong>Deadline:</strong> {% if opp.deadline %}{{ opp.deadline }}{% else %}<span class="not-specified">Not specified by source</span>{% endif %}</p>
+            <p><strong>Start Date:</strong> {% if opp.start_date %}{{ opp.start_date }}{% else %}<span class="not-specified">Not specified by source</span>{% endif %}</p>
+        </div>
+
+        <!-- 6. Required Skills -->
+        <div class="section">
+            <h2>Required Skills</h2>
+            <div>
+                {% for skill in required_skills %}
+                    <span class="skill-tag {% if skill in matched_skills %}skill-matched{% elif skill in missing_skills %}skill-missing{% endif %}">
+                        {{ skill }}
+                        {% if skill in matched_skills %} ✓{% endif %}
+                        {% if skill in missing_skills %} ✗{% endif %}
+                    </span>
+                {% endfor %}
+                {% if required_skills|length == 0 %}
+                    <p class="not-specified">No required skills listed by source.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- 7. Working Strategy / Role Information (grounded facts only) -->
+        <div class="section">
+            <h2>Working Strategy / Role Information</h2>
+            <div class="role-box">
+                <p><strong>Role Type:</strong> {{ opp.opp_type | title }}</p>
+                <p><strong>Company:</strong> {% if opp.company %}{{ opp.company }}{% else %}<span class="not-specified">Not specified by source</span>{% endif %}</p>
+                <p><strong>Location:</strong> {% if opp.location %}{{ opp.location }}{% else %}<span class="not-specified">Not specified by source</span>{% endif %}</p>
+                <p><strong>Salary/Stipend:</strong> {% if opp.salary_stipend %}<span class="salary">{{ opp.salary_stipend }}</span>{% else %}<span class="not-specified">Not specified by source</span>{% endif %}</p>
+                <p><strong>Listed Via:</strong> {{ opp.source }}</p>
+                <p class="not-specified">Role details beyond the above are as described in Requirements. No additional responsibilities inferred.</p>
+            </div>
+        </div>
+
+        <!-- 8. Match Percentage -->
+        <div class="section">
+            <h2>Match Percentage</h2>
+            <span class="score-box match">📈 Match: {{ match_percent }}%</span>
+        </div>
+
+        <!-- 9. ATS Compatibility Score -->
+        <div class="section">
+            <h2>ATS Compatibility Score: {{ ats_score }}/100</h2>
+            <p><small>{{ ats_disclaimer }}</small></p>
+            {% if ats_suggestions %}
+                <h3>Suggestions</h3>
+                <ul>
+                    {% for s in ats_suggestions %}
+                        <li>{{ s }}</li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>Your resume already covers this listing well.</p>
+            {% endif %}
+        </div>
+
+        <!-- 10. Skill Gap -->
+        <div class="section">
+            <h2>Skill Gap</h2>
+
+            <h3>A. Matched Skills</h3>
+            <div>
+                {% for skill in matched_skills %}
+                    <span class="skill-tag skill-matched">{{ skill }} ✓</span>
+                {% endfor %}
+                {% if matched_skills|length == 0 %}
+                    <p>No skills matched yet. Consider updating your profile.</p>
+                {% endif %}
+            </div>
+
+            <h3>B. Missing Skills</h3>
+            <div>
+                {% for skill in missing_skills %}
+                    <span class="skill-tag skill-missing">{{ skill }} ✗</span>
+                {% endfor %}
+                {% if missing_skills|length == 0 %}
+                    <p>🎉 Great job! You have all required skills!</p>
+                {% endif %}
+            </div>
+
+            <h3>C. Performance Improvement</h3>
+            {% if improvement_path %}
+                <p><strong>Current Score:</strong> {{ improvement_path.current_score }}% → <strong>Target:</strong> {{ improvement_path.target_score }}%</p>
+                <p><strong>Estimated Time:</strong> {{ improvement_path.estimated_time }}</p>
+                {% for action in improvement_path.actions %}
+                    <div class="improvement-item">
+                        <span class="skill-name">{{ action.skill }}</span> →
+                        <span class="action-name">{{ action.action }}</span>
+                        <br>
+                        <span class="resource-link">📚 {{ action.resource }}</span> |
+                        <span class="time-est">⏱️ {{ action.time }}</span>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p>No improvement needed! You're fully qualified.</p>
+            {% endif %}
+        </div>
+
+        {% if apply_url %}
+            <a href="{{ apply_url }}" target="_blank" rel="noopener noreferrer" class="apply-btn">APPLY NOW →</a>
+        {% else %}
+            <span class="apply-btn apply-disabled">APPLY NOW</span>
+            <p class="apply-unavailable">Application link unavailable.</p>
+        {% endif %}
+    </div>
+</body>
+</html>

@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard | Student Platform</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        body { margin: 0; }
+        .container { max-width: 1000px; margin: 0 auto; padding: 20px; }
+        h1 { text-align: center; color: #0056b3; }
+        nav { text-align: center; margin-bottom: 30px; padding: 10px; border-bottom: 2px solid #007bff; }
+        nav a { margin: 0 15px; text-decoration: none; color: #007bff; font-weight: bold; }
+        nav a:hover { text-decoration: underline; }
+        .logout-btn { position: fixed; bottom: 20px; right: 20px; background: #dc3545; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; text-decoration: none; font-weight: bold; }
+        .logout-btn:hover { background: #c82333; }
+        .section { margin-bottom: 30px; padding: 20px; border: 1px solid #ddd; border-radius: 8px; background: rgba(255,255,255,0.8); }
+        .section h2 { margin-top: 0; color: #007bff; }
+        .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 15px; }
+        .card { border: 1px solid #ccc; padding: 15px; border-radius: 8px; background: white; cursor: pointer; transition: all 0.3s; }
+        .card:hover { border-color: #007bff; box-shadow: 2px 2px 8px rgba(0,0,0,0.1); }
+        .match-badge { background: #28a745; color: white; padding: 3px 8px; border-radius: 10px; font-size: 12px; }
+        .match-low { background: #dc3545; }
+        .match-med { background: #ffc107; color: #333; }
+        .badge { display: inline-block; padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; margin-right: 5px; }
+        .badge-job { background: #007bff; color: white; }
+        .badge-internship { background: #28a745; color: white; }
+        .card .meta { color: #555; font-size: 13px; line-height: 1.6; margin: 8px 0; }
+        .card h3 { margin: 5px 0; color: #0056b3; font-size: 16px; }
+        .card .actions { margin-top: 10px; }
+        .card .actions .btn, .card .actions button.btn { font-size: 12px; padding: 6px 12px; margin: 2px; }
+        .apply-btn { display: inline-block; background: #28a745; color: white; padding: 6px 12px; border-radius: 4px; text-decoration: none; font-size: 12px; margin: 2px; }
+        .apply-btn.apply-disabled { background: #6c757d; cursor: not-allowed; }
+        .save-btn { background: #fff; color: #007bff; border: 1px solid #007bff; cursor: pointer; }
+        .save-btn.saved { background: #007bff; color: #fff; }
+        .filter-row { margin-bottom: 12px; font-size: 13px; }
+        .filter-row a { margin-right: 10px; text-decoration: none; color: #007bff; }
+        .filter-row a.active { font-weight: bold; text-decoration: underline; }
+        textarea { width: 100%; height: 150px; margin-bottom: 10px; }
+        .parser-box { display: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Student Dashboard</h1>
+        <nav>
+            <a href="/profile">Edit Profile</a> | 
+            <a href="/resume-select">Generate Resume</a> | 
+            <a href="/find-opportunities">Internship & Job Recommendations</a>
+        </nav>
+
+        <!-- Section 1: Edit Profile -->
+        <div class="section">
+            <h2>Edit Profile</h2>
+            <p>Update your personal information, skills, education, and experience.</p>
+            <a href="/profile" class="btn">Go to Profile</a>
+        </div>
+
+        <!-- Section 2: Generate Resume -->
+        <div class="section">
+            <h2>Generate Resume</h2>
+            <p>Choose a template and generate your resume using your saved profile details.</p>
+            <a href="/resume-select" class="btn">Generate Resume</a>
+        </div>
+
+        <!-- Section 3: Internship & Job Recommendations -->
+        <div class="section" id="opportunities-section">
+            <h2>Internship & Job Recommendations</h2>
+            <div class="filter-row">
+                <a href="/dashboard?filter=all" class="{% if opp_filter == 'all' %}active{% endif %}">All</a>
+                <a href="/dashboard?filter=internship" class="{% if opp_filter == 'internship' %}active{% endif %}">Internships</a>
+                <a href="/dashboard?filter=job" class="{% if opp_filter == 'job' %}active{% endif %}">Jobs</a>
+                <a href="/dashboard?filter=saved" class="{% if opp_filter == 'saved' %}active{% endif %}">★ Saved</a>
+            </div>
+            {% if opportunities %}
+                <div class="cards">
+                    {% for opp in opportunities %}
+                        <div class="card" onclick="window.location.href='/opportunity/{{ opp.id }}'">
+                            <span class="badge badge-{{ opp.opp_type }}">{{ opp.opp_type | title }}</span>
+                            <span class="match-badge {% if opp.match_percent >= 70 %}match-high{% elif opp.match_percent >= 40 %}match-med{% else %}match-low{% endif %}">
+                                {{ opp.match_percent }}% Match
+                            </span>
+                            <h3>{{ opp.title }}</h3>
+                            <div class="meta">
+                                <strong>Company:</strong> {{ opp.company or 'Not specified' }}<br>
+                                <strong>Location:</strong> {{ opp.location or 'Not specified' }}<br>
+                                <strong>Deadline:</strong> {{ opp.deadline or 'Not specified' }}
+                            </div>
+                            <div class="actions" onclick="event.stopPropagation()">
+                                {% if opp.apply_url %}
+                                    <a href="{{ opp.apply_url }}" target="_blank" rel="noopener noreferrer" class="apply-btn">Apply</a>
+                                {% else %}
+                                    <span class="apply-btn apply-disabled">Apply</span>
+                                {% endif %}
+                                <a href="/opportunity/{{ opp.id }}" class="btn">View Details</a>
+                                {% if opp.id in saved_ids %}
+                                    <form method="post" action="/unsave-opportunity/{{ opp.id }}" style="display:inline;">
+                                        <button type="submit" class="btn save-btn saved">★ Saved</button>
+                                    </form>
+                                {% else %}
+                                    <form method="post" action="/save-opportunity/{{ opp.id }}" style="display:inline;">
+                                        <button type="submit" class="btn save-btn">☆ Save</button>
+                                    </form>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+                <p><a href="/find-opportunities" class="btn">View All Opportunities →</a></p>
+            {% else %}
+                {% if opp_filter == 'saved' %}
+                    <p>You haven't saved any opportunities yet. Use ☆ Save on any card to bookmark it here.</p>
+                {% else %}
+                    <p>No active opportunities right now. Check back later.</p>
+                {% endif %}
+                <p><a href="/find-opportunities" class="btn">Refresh Opportunities →</a></p>
+            {% endif %}
+        </div>
+    </div>
+    <a href="/logout" class="logout-btn">Logout</a>
+</body>
+</html>

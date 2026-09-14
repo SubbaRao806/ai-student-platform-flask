@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Add Opportunity</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h2>Post New Opportunity</h2>
+        <form method="POST">
+            <div class="form-group">
+                <input type="text" name="title" placeholder="Job Title" required>
+            </div>
+            <div class="form-group">
+                <select name="type">
+                    <option value="job">Job</option>
+                    <option value="internship">Internship</option>
+                    <option value="scholarship">Scholarship</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <textarea name="description" placeholder="Description"></textarea>
+            </div>
+            <div class="form-group">
+                <input type="text" name="skills" placeholder="Required Skills (comma separated)">
+            </div>
+            <div class="form-group">
+                <input type="url" name="application_url" placeholder="Application URL" required>
+            </div>
+            <button type="submit">Post Opportunity</button>
+        </form>
+    </div>
+</body>
+</html>
